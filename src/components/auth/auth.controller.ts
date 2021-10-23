@@ -1,9 +1,9 @@
 import { compareSync } from 'bcrypt';
 import { Request, Response } from 'express';
 import { generalJWT } from '../../helpers/jwt';
-import ErrorHandler from '../../middlewares/error';
+import ErrorHandler from '../../helpers/error';
 import userService from '../user/user.service';
-
+import ResponseHandler from '../../helpers/response';
 
 const authLogin = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
@@ -23,7 +23,7 @@ const authLogin = async (req: Request, res: Response): Promise<void> => {
 
     // Generar token - JWT
     const token = generalJWT(user.email);
-    res.status(200).json({
+    ResponseHandler(req, res, 200, {
       ok: true,
       token
     })
@@ -38,10 +38,10 @@ const getUser = async (req: Request, res: Response): Promise<void> => {
   const email = res.locals.uid;
   try {
       const user = await userService.getUserByEmail(email);
-      res.json({
-          ok: true,
-          user
-      });
+      ResponseHandler(req, res, 200, {
+        ok: true,
+        user
+      })
   } catch (error) {
       ErrorHandler(req, res, 500, 'Error al devolver datos del usuario')
   }

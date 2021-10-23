@@ -1,7 +1,7 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import environment from '../config/environments/environment';
-import ErrorHandler from './error';
+import ErrorHandler from '../helpers/error';
 
 const validarJWT = (req: Request, res: Response, next: NextFunction): void => {
 
@@ -13,7 +13,7 @@ const validarJWT = (req: Request, res: Response, next: NextFunction): void => {
     }
     try {
         const tk = jwt.verify(token, environment.JWT_SECRET);
-        
+
         const tk1 = tk as JwtPayload;
         res.locals.uid = tk1.payload.uid;
         next();
@@ -22,7 +22,7 @@ const validarJWT = (req: Request, res: Response, next: NextFunction): void => {
         ErrorHandler(req, res, 401, 'Token incorrecto');
     }
 
-    
+
 }
 
 const validarJwtActiveUser = (req: Request, res: Response, next: NextFunction): void => {
@@ -42,7 +42,7 @@ const validarJwtActiveUser = (req: Request, res: Response, next: NextFunction): 
         ErrorHandler(req, res, 401, 'Token incorrecto');
     }
 
-    
+
 }
 
 

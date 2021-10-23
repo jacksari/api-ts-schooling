@@ -1,16 +1,27 @@
 import { Request, Response } from 'express';
-import ErrorHandler from '../../middlewares/error';
+import ErrorHandler from '../../helpers/error';
 import userService from './user.service';
 import { User } from '../../data/user.data';
+import { genSaltSync, hashSync } from 'bcrypt';
+import slug from 'slug';
+import { uid } from 'uid';
+import ResponseHandler from '../../helpers/response';
+
+const saltRounds = 10;
 
 
 const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await userService.createUser(req.body);
-    res.status(200).json({
-      ok: true,
-      user
-    })
+    const newUser: User = {
+      name: req.body.name,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      password: hashSync(req.body.password as string, genSaltSync(saltRounds)),
+      img: `https://ui-avatars.com/api/?name=${req.body.name}+${req.body.lastname}`,
+      slug: `${slug(req.body.name)}-${slug(req.body.lastname)}-${uid(6)}`,
+    }
+    const user = await userService.createUser(newUser)
+    ResponseHandler(req, res, 200, user)
   } catch (error) {
     ErrorHandler(req, res, 500, 'Error al crear usuario');
   }
@@ -26,14 +37,13 @@ const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const users = await userService.getUsers(desde, limit, search);
     const total = await userService.countUsers();
-    res.status(200).json({
-      ok: true,
+    ResponseHandler(req, res, 200, {
       page,
       per_page: limit,
       total,
       total_page: Math.ceil(total/limit),
       users
-    })
+    });
   } catch (error) {
     ErrorHandler(req, res, 500, 'Error al listar usuarios')
   }
@@ -45,12 +55,9 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
     if(!user){
       return ErrorHandler(req, res, 404, 'No existe un usuario con ese id');
     }
-    res.status(200).json({
-      ok: true,
-      user
-    })
+    ResponseHandler(req, res, 200, user);
   } catch (error) {
-    ErrorHandler(req, res, 500 , 'Error al lista usuario')
+    ErrorHandler(req, res, 500 , 'Error al lista usuario');
   }
 }
 
@@ -60,10 +67,8 @@ const getUserBySlug = async(req: Request, res: Response): Promise<void> => {
     if(!user){
       return ErrorHandler(req, res, 404, 'No existe un usuario con ese slug');
     }
-    res.status(200).json({
-      ok: true,
-      user
-    })
+    ResponseHandler(req, res, 200, user);
+
   } catch (error) {
     ErrorHandler(req, res, 500, 'Error al listar usuario por slug');
   }
@@ -91,9 +96,9 @@ const updateUserById = async (req: Request, res: Response): Promise<void> => {
 
       const newUser = await userService.updateUserById(campos,user._id  as string);
 
-      res.json({
-          user: newUser,
-          ok: true
+      ResponseHandler(req, res, 200, {
+        user: newUser,
+        ok: true
       })
 
   } catch (error) {
@@ -110,10 +115,10 @@ const deleteUserById = async(req: Request, res: Response): Promise<void> => {
       return ErrorHandler(req, res, 404, 'No existe un usuario con ese slug');
     }
     await userService.deleteUser(user._id as string);
-    res.json({
+    ResponseHandler(req, res, 200, {
       msg: 'Usuario eliminado',
       ok: true
-  })
+    })
   } catch (error) {
     ErrorHandler(req, res, 500, 'Error al listar usuario por slug');
   }

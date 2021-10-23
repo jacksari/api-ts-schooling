@@ -1,7 +1,7 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import environment from '../config/environments/environment';
-import ErrorHandler from './error';
+import ErrorHandler from '../helpers/error';
 import userService from '../components/user/user.service';
 
 const validarADMIN = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

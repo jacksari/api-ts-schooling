@@ -21,8 +21,8 @@ router.post(
 router.get(
   '/',
   [
-    validarJWT,
-    validarADMIN
+    //validarJWT,
+    //validarADMIN
   ],
   getUsers
 );

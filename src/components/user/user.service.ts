@@ -1,20 +1,8 @@
 import UserModel from '../../models/user.model';
 import { User } from '../../data/user.data';
-import { uid } from 'uid';
-
-import { genSaltSync, hashSync } from 'bcrypt';
-import slug from 'slug';
-const saltRounds = 10;
 
 const createUser = async (user: User): Promise<User> => {
-  return await UserModel.create({
-    name: user.name,
-    lastname: user.lastname,
-    email: user.email,
-    password: hashSync(user.password as string, genSaltSync(saltRounds)),
-    img: `https://ui-avatars.com/api/?name=${user.name}+${user.lastname}`,
-    slug: `${slug(user.name)}-${slug(user.lastname)}-${uid(6)}`,
-  });
+  return await UserModel.create(user);
 }
 
 const getUsers = async (desde: number, limit: number, search: string): Promise<User> => {
